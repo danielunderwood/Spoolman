@@ -38,3 +38,25 @@ Spoolman is a self-hosted web service designed to help you efficiently manage yo
 
 ## Installation
 Please see the [Installation page on the Wiki](https://github.com/Donkie/Spoolman/wiki/Installation) for details how to install Spoolman.
+
+## Development
+
+Requirements
+- pdm
+
+```shell
+cd client
+npm i --include dev
+export VITE_APIURL=localhost:8000/api/v1
+npm run build # This is what the backend code wants, but we comment out the SPA part
+npm run dev
+cd ..
+pdm venv create
+pdm install --with dev
+pdm add python-multipart # ???
+export SPOOLMAN_DEBUG_MODE=1
+pdm run uvicorn spoolman.main:app --reload --reload-dir spoolman --reload-dir client/dist
+```
+
+FIXME: When spool filament is adjusted on the spools page, the number in the
+table is not updated until the page is refreshed.

@@ -12,6 +12,7 @@ from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import PlainTextResponse, RedirectResponse, Response
 from prometheus_client import generate_latest
 from scheduler.asyncio.scheduler import Scheduler
+from rich.logging import RichHandler
 
 from spoolman import env, externaldb
 from spoolman.api.v1.router import app as v1_app
@@ -20,10 +21,10 @@ from spoolman.database import database
 from spoolman.prometheus.metrics import registry
 
 # Define a console logger
-console_handler = logging.StreamHandler()
-console_handler.setFormatter(logging.Formatter("%(name)-26s %(levelname)-8s %(message)s"))
+console_handler = RichHandler()
+# console_handler.setFormatter(logging.Formatter("%(name)-26s %(levelname)-8s %(message)s"))
 
-# Setup the spoolman logger, which all spoolman modules will use
+# Setup the spoolman logger, which all spoolman modules will uses
 log_level = env.get_logging_level()
 root_logger = logging.getLogger()
 root_logger.setLevel(log_level)
@@ -100,6 +101,7 @@ window.SPOOLMAN_BASE_PATH = "{base_path}";
 
 
 # Mount the client side app
+# FIXME: This is really annoying since it prevents you from running the frontend in dev mode
 app.mount(base_path, app=SinglePageApplication(directory="client/dist", base_path=env.get_base_path()))
 
 # Allow all origins if in debug mode
