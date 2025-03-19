@@ -28,6 +28,7 @@ the form's onFinish method. Form.Item's normalize should do this, but it doesn't
 
 type ISpoolRequest = ISpoolParsedExtras & {
   filament_id: number | string;
+  picture_url?: string;
 };
 
 export const SpoolEdit: React.FC<IResourceComponentsProps> = () => {
@@ -122,7 +123,7 @@ export const SpoolEdit: React.FC<IResourceComponentsProps> = () => {
         });
       } else {
         // Handle picture upload
-        if (allValues.picture_url && allValues.picture_url instanceof File) {
+        if (allValues.picture_url) {
           const formData = new FormData();
           formData.append("file", allValues.picture_url);
           try {

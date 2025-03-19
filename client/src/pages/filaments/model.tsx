@@ -20,6 +20,7 @@ export interface IFilament {
   multi_color_direction?: string;
   external_id?: string;
   extra: { [key: string]: string };
+  picture_url?: string;
 }
 
 // IFilamentParsedExtras is the same as IFilament, but with the extra field parsed into its real types

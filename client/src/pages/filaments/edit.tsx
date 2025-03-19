@@ -72,7 +72,7 @@ export const FilamentEdit: React.FC<IResourceComponentsProps> = () => {
       const stringifiedAllValues = StringifiedExtras<IFilamentParsedExtras>(allValues);
 
       // Handle picture upload
-      if (allValues.picture_url && allValues.picture_url instanceof File) {
+      if (allValues.picture_url) {
         const formData = new FormData();
         formData.append("file", allValues.picture_url);
         try {

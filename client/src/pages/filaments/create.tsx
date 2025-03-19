@@ -1,6 +1,6 @@
 import { Create, useForm, useSelect } from "@refinedev/antd";
 import { HttpError, IResourceComponentsProps, useInvalidate, useTranslate } from "@refinedev/core";
-import { Button, ColorPicker, Form, Input, InputNumber, Radio, Select, Typography } from "antd";
+import { Button, ColorPicker, Form, Input, InputNumber, Radio, Select, Typography, Upload } from "antd";
 import TextArea from "antd/es/input/TextArea";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
@@ -350,6 +350,7 @@ export const FilamentCreate: React.FC<IResourceComponentsProps & CreateOrClonePr
         </Form.Item>
         <Form.Item
           label={t("filament.fields.comment")}
+          help={"This is the comment field"}
           name={["comment"]}
           rules={[
             {
@@ -358,6 +359,14 @@ export const FilamentCreate: React.FC<IResourceComponentsProps & CreateOrClonePr
           ]}
         >
           <TextArea maxLength={1024} />
+        </Form.Item>
+        <Form.Item label="Image">
+          <Form.Item name="dragger">
+            <Upload.Dragger name="files" action="/upload.do">
+              <p className="ant-upload-drag-icon">+</p>
+              <p className="ant-upload-text">Click or drag file to this area to upload</p>
+            </Upload.Dragger>
+          </Form.Item>
         </Form.Item>
         <Typography.Title level={5}>{t("settings.extra_fields.tab")}</Typography.Title>
         {extraFields.data?.map((field, index) => (

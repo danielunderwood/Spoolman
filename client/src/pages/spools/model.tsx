@@ -24,6 +24,7 @@ export interface ISpool {
   comment?: string;
   archived: boolean;
   extra: { [key: string]: string };
+  picture_url?: string;
 }
 
 // ISpoolParsedExtras is the same as ISpool, but with the extra field parsed into its real types
