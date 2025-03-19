@@ -388,6 +388,11 @@ export const FilamentEdit: React.FC<IResourceComponentsProps> = () => {
             <Button icon={<UploadOutlined />}>{t("filament.fields.upload_picture")}</Button>
           </Upload>
         </Form.Item>
+        {formProps.initialValues?.picture_url && (
+          <Form.Item label={t("filament.fields.current_picture")}>
+            <img src={formProps.initialValues.picture_url} alt="Current Picture" style={{ maxWidth: "100%" }} />
+          </Form.Item>
+        )}
         <Typography.Title level={5}>{t("settings.extra_fields.tab")}</Typography.Title>
         {extraFields.data?.map((field, index) => (
           <ExtraFieldFormItem key={index} field={field} />

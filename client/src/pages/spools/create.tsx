@@ -1,7 +1,7 @@
-import { MinusOutlined, PlusOutlined } from "@ant-design/icons";
+import { MinusOutlined, PlusOutlined, UploadOutlined } from "@ant-design/icons";
 import { Create, useForm } from "@refinedev/antd";
 import { HttpError, IResourceComponentsProps, useTranslate } from "@refinedev/core";
-import { Alert, Button, DatePicker, Divider, Form, Input, InputNumber, Radio, Select, Typography } from "antd";
+import { Alert, Button, DatePicker, Divider, Form, Input, InputNumber, Radio, Select, Typography, Upload, message } from "antd";
 import TextArea from "antd/es/input/TextArea";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
@@ -16,6 +16,7 @@ import { getCurrencySymbol, useCurrency } from "../../utils/settings";
 import { createFilamentFromExternal } from "../filaments/functions";
 import { useGetFilamentSelectOptions } from "./functions";
 import { ISpool, ISpoolParsedExtras, WeightToEnter } from "./model";
+import axios from "axios";
 
 dayjs.extend(utc);
 
@@ -31,6 +32,7 @@ export const SpoolCreate: React.FC<IResourceComponentsProps & CreateOrCloneProps
   const t = useTranslate();
   const extraFields = useGetFields(EntityType.spool);
   const currency = useCurrency();
+  const [messageApi, contextHolder] = message.useMessage();
 
   const { form, formProps, formLoading, onFinish, redirect } = useForm<
     ISpool,
@@ -115,6 +117,23 @@ export const SpoolCreate: React.FC<IResourceComponentsProps & CreateOrCloneProps
       }
       const internalFilament = await createFilamentFromExternal(externalFilament);
       values.filament_id = internalFilament.id;
+    }
+
+    // Handle picture upload
+    if (values.picture_url && values.picture_url instanceof File) {
+      const formData = new FormData();
+      formData.append("file", values.picture_url);
+      try {
+        const response = await axios.post("/api/v1/spool/upload-picture", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+        values.picture_url = response.data.message;
+      } catch (error) {
+        messageApi.error(t("spool.form.picture_upload_failed"));
+        return;
+      }
     }
 
     if (quantity > 1) {
@@ -486,6 +505,31 @@ export const SpoolCreate: React.FC<IResourceComponentsProps & CreateOrCloneProps
         >
           <TextArea maxLength={1024} />
         </Form.Item>
+        <Form.Item
+          label={t("spool.fields.picture_url")}
+          name={["picture_url"]}
+          valuePropName="file"
+          getValueFromEvent={(e) => {
+            if (Array.isArray(e)) {
+              return e;
+            }
+            return e && e.file;
+          }}
+          rules={[
+            {
+              required: false,
+            },
+          ]}
+        >
+          <Upload name="file" listType="picture" maxCount={1} beforeUpload={() => false}>
+            <Button icon={<UploadOutlined />}>{t("spool.fields.upload_picture")}</Button>
+          </Upload>
+        </Form.Item>
+        {formProps.initialValues?.picture_url && (
+          <Form.Item label={t("spool.fields.current_picture")}>
+            <img src={formProps.initialValues.picture_url} alt="Current Picture" style={{ maxWidth: "100%" }} />
+          </Form.Item>
+        )}
         <Typography.Title level={5}>{t("settings.extra_fields.tab")}</Typography.Title>
         {extraFields.data?.map((field, index) => (
           <ExtraFieldFormItem key={index} field={field} />

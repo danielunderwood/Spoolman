@@ -559,18 +559,3 @@ async def measure(  # noqa: ANN201
             content={"message": e.args[0]},
         )
 
-
-@router.post(
-    "/upload-picture",
-    name="Upload spool picture",
-    description="Upload a picture for a spool and get the URL.",
-    response_model_exclude_none=True,
-    response_model=Message,
-    responses={400: {"model": Message}},
-)
-async def upload_picture(  # noqa: ANN201
-    file: UploadFile,
-):
-    # Placeholder for actual file upload logic
-    picture_url = f"https://example.com/uploads/{file.filename}"
-    return Message(message=picture_url)

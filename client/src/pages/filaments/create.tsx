@@ -1,6 +1,6 @@
 import { Create, useForm, useSelect } from "@refinedev/antd";
 import { HttpError, IResourceComponentsProps, useInvalidate, useTranslate } from "@refinedev/core";
-import { Button, ColorPicker, Form, Input, InputNumber, Radio, Select, Typography, Upload } from "antd";
+import { Button, ColorPicker, Form, Input, InputNumber, Radio, Select, Typography, Upload, message } from "antd";
 import TextArea from "antd/es/input/TextArea";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
@@ -15,6 +15,8 @@ import { getCurrencySymbol, useCurrency } from "../../utils/settings";
 import { getOrCreateVendorFromExternal } from "../vendors/functions";
 import { IVendor } from "../vendors/model";
 import { IFilament, IFilamentParsedExtras } from "./model";
+import { UploadOutlined } from "@ant-design/icons";
+import axios from "axios";
 
 dayjs.extend(utc);
 
@@ -33,6 +35,7 @@ export const FilamentCreate: React.FC<IResourceComponentsProps & CreateOrClonePr
   const [isImportExtOpen, setIsImportExtOpen] = useState(false);
   const invalidate = useInvalidate();
   const [colorType, setColorType] = useState<"single" | "multi">("single");
+  const [messageApi, contextHolder] = message.useMessage();
 
   const { form, formProps, formLoading, onFinish, redirect } = useForm<
     IFilament,
@@ -57,6 +60,24 @@ export const FilamentCreate: React.FC<IResourceComponentsProps & CreateOrClonePr
 
   const handleSubmit = async (redirectTo: "list" | "create") => {
     const values = StringifiedExtras(await form.validateFields());
+
+    // Handle picture upload
+    if (values.picture_url && values.picture_url instanceof File) {
+      const formData = new FormData();
+      formData.append("file", values.picture_url);
+      try {
+        const response = await axios.post("/api/v1/filament/upload-picture", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+        values.picture_url = response.data.message;
+      } catch (error) {
+        messageApi.error(t("filament.form.picture_upload_failed"));
+        return;
+      }
+    }
+
     await onFinish(values);
     redirect(redirectTo);
   };
@@ -360,13 +381,25 @@ export const FilamentCreate: React.FC<IResourceComponentsProps & CreateOrClonePr
         >
           <TextArea maxLength={1024} />
         </Form.Item>
-        <Form.Item label="Image">
-          <Form.Item name="dragger">
-            <Upload.Dragger name="files" action="/upload.do">
-              <p className="ant-upload-drag-icon">+</p>
-              <p className="ant-upload-text">Click or drag file to this area to upload</p>
-            </Upload.Dragger>
-          </Form.Item>
+        <Form.Item
+          label={t("filament.fields.picture_url")}
+          name={["picture_url"]}
+          valuePropName="file"
+          getValueFromEvent={(e) => {
+            if (Array.isArray(e)) {
+              return e;
+            }
+            return e && e.file;
+          }}
+          rules={[
+            {
+              required: false,
+            },
+          ]}
+        >
+          <Upload name="file" listType="picture" maxCount={1} beforeUpload={() => false}>
+            <Button icon={<UploadOutlined />}>{t("filament.fields.upload_picture")}</Button>
+          </Upload>
         </Form.Item>
         <Typography.Title level={5}>{t("settings.extra_fields.tab")}</Typography.Title>
         {extraFields.data?.map((field, index) => (

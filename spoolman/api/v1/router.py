@@ -4,8 +4,10 @@
 
 import asyncio
 import logging
+from pathlib import Path
+import uuid
 
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, UploadFile
 from fastapi.responses import JSONResponse
 from starlette.requests import Request
 from starlette.responses import Response
@@ -101,6 +103,21 @@ async def notify(
                 await websocket.send_json({"status": "healthy"})
     except WebSocketDisconnect:
         websocket_manager.disconnect((), websocket)
+
+
+@app.post("/upload-image")
+async def upload_image(file: UploadFile) -> models.Message:
+    data_dir = env.get_data_dir()
+    upload_dir = data_dir / "uploads"
+    upload_dir.mkdir(parents=True, exist_ok=True)
+
+    unique_filename = f"{uuid.uuid4()}{Path(file.filename).suffix}"
+    file_path = upload_dir / unique_filename
+    with file_path.open("wb") as f:
+        f.write(await file.read())
+
+    picture_url = f"/uploads/{unique_filename}"
+    return models.Message(message=picture_url)
 
 
 # Add routers
