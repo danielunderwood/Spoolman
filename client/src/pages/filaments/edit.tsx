@@ -6,7 +6,7 @@ import dayjs from "dayjs";
 import React, { useEffect, useState } from "react";
 import { ExtraFieldFormItem, ParsedExtras, StringifiedExtras } from "../../components/extraFields";
 import { MultiColorPicker } from "../../components/multiColorPicker";
-import { numberFormatter, numberParser, numberParserAllowEmpty } from "../../utils/parsing";
+import { formatNumberOnUserInput, numberParser, numberParserAllowEmpty } from "../../utils/parsing";
 import { EntityType, useGetFields } from "../../utils/queryFields";
 import { getCurrencySymbol, useCurrency } from "../../utils/settings";
 import { IVendor } from "../vendors/model";
@@ -66,7 +66,7 @@ export const FilamentEdit: React.FC<IResourceComponentsProps> = () => {
   formProps.onFinish = async (allValues: IFilamentParsedExtras) => {
     if (allValues !== undefined && allValues !== null) {
       if (colorType == "single") {
-        allValues.multi_color_hexes = '';
+        allValues.multi_color_hexes = "";
       }
       // Lot of stupidity here to make types work
       const stringifiedAllValues = StringifiedExtras<IFilamentParsedExtras>(allValues);
@@ -189,7 +189,7 @@ export const FilamentEdit: React.FC<IResourceComponentsProps> = () => {
               return e?.toHex();
             }}
           >
-            <ColorPicker format="hex" />
+            <ColorPicker />
           </Form.Item>
         )}
         {colorType == "multi" && (
@@ -248,7 +248,7 @@ export const FilamentEdit: React.FC<IResourceComponentsProps> = () => {
           <InputNumber
             addonAfter={getCurrencySymbol(undefined, currency)}
             precision={2}
-            formatter={numberFormatter}
+            formatter={formatNumberOnUserInput}
             parser={numberParserAllowEmpty}
           />
         </Form.Item>
@@ -264,7 +264,7 @@ export const FilamentEdit: React.FC<IResourceComponentsProps> = () => {
             },
           ]}
         >
-          <InputNumber addonAfter="g/cm³" precision={2} formatter={numberFormatter} parser={numberParser} />
+          <InputNumber addonAfter="g/cm³" precision={2} formatter={formatNumberOnUserInput} parser={numberParser} />
         </Form.Item>
         <Form.Item
           label={t("filament.fields.diameter")}
@@ -278,7 +278,7 @@ export const FilamentEdit: React.FC<IResourceComponentsProps> = () => {
             },
           ]}
         >
-          <InputNumber addonAfter="mm" precision={2} formatter={numberFormatter} parser={numberParser} />
+          <InputNumber addonAfter="mm" precision={2} formatter={formatNumberOnUserInput} parser={numberParser} />
         </Form.Item>
         <Form.Item
           label={t("filament.fields.weight")}
