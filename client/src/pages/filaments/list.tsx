@@ -7,27 +7,28 @@ import utc from "dayjs/plugin/utc";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import {
-    ActionsColumn,
-    CustomFieldColumn,
-    DateColumn,
-    FilteredQueryColumn,
-    NumberColumn,
-    RichColumn,
-    SortedColumn,
-    SpoolIconColumn,
+  ActionsColumn,
+  CustomFieldColumn,
+  DateColumn,
+  FilteredQueryColumn,
+  NumberColumn,
+  RichColumn,
+  SortedColumn,
+  SpoolIconColumn,
 } from "../../components/column";
 import { useLiveify } from "../../components/liveify";
 import {
-    useSpoolmanArticleNumbers,
-    useSpoolmanFilamentNames,
-    useSpoolmanMaterials,
-    useSpoolmanVendors,
+  useSpoolmanArticleNumbers,
+  useSpoolmanFilamentNames,
+  useSpoolmanMaterials,
+  useSpoolmanVendors,
 } from "../../components/otherModels";
 import { removeUndefined } from "../../utils/filtering";
 import { EntityType, useGetFields } from "../../utils/queryFields";
 import { TableState, useInitialTableState, useStoreInitialState } from "../../utils/saveload";
 import { useCurrencyFormatter } from "../../utils/settings";
 import { IFilament } from "./model";
+import { getAPIURL } from "../../utils/url";
 
 dayjs.extend(utc);
 
@@ -243,10 +244,11 @@ export const FilamentList: React.FC<IResourceComponentsProps> = () => {
             color: (record: IFilamentCollapsed) =>
               record.multi_color_hexes
                 ? {
-                    colors: record.multi_color_hexes.split(","),
-                    vertical: record.multi_color_direction === "longitudinal",
-                  }
+                  colors: record.multi_color_hexes.split(","),
+                  vertical: record.multi_color_direction === "longitudinal",
+                }
                 : record.color_hex,
+            picture_url: (record: IFilamentCollapsed) => record.picture_url,
             filterValueQuery: useSpoolmanFilamentNames(),
           }),
           FilteredQueryColumn({

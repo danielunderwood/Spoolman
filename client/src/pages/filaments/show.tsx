@@ -12,6 +12,7 @@ import { enrichText } from "../../utils/parsing";
 import { EntityType, useGetFields } from "../../utils/queryFields";
 import { useCurrencyFormatter } from "../../utils/settings";
 import { IFilament } from "./model";
+import { getAPIURL } from "../../utils/url";
 dayjs.extend(utc);
 
 const { Title } = Typography;
@@ -52,9 +53,9 @@ export const FilamentShow: React.FC<IResourceComponentsProps> = () => {
 
   const colorObj = record?.multi_color_hexes
     ? {
-        colors: record.multi_color_hexes.split(","),
-        vertical: record.multi_color_direction === "longitudinal",
-      }
+      colors: record.multi_color_hexes.split(","),
+      vertical: record.multi_color_direction === "longitudinal",
+    }
     : record?.color_hex;
 
   return (
@@ -149,7 +150,7 @@ export const FilamentShow: React.FC<IResourceComponentsProps> = () => {
       <Title level={5}>{t("filament.fields.comment")}</Title>
       <TextField value={enrichText(record?.comment)} />
       <Title level={5}>{t("filament.fields.picture_url")}</Title>
-      {record?.picture_url && <img src={record.picture_url} alt="Filament" style={{ maxWidth: "100%" }} />}
+      {record?.picture_url && <img src={getAPIURL() + record.picture_url} alt="Filament" style={{ maxWidth: "100%" }} />}
       <Title level={4}>{t("settings.extra_fields.tab")}</Title>
       {extraFields?.data?.map((field, index) => (
         <ExtraFieldDisplay key={index} field={field} value={record?.extra[field.key]} />

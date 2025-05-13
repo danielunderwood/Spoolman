@@ -13,6 +13,7 @@ import { IVendor } from "../vendors/model";
 import { IFilament, IFilamentParsedExtras } from "./model";
 import { UploadOutlined } from "@ant-design/icons";
 import axios from "axios";
+import { getAPIURL } from "../../utils/url";
 
 /*
 The API returns the extra fields as JSON values, but we need to parse them into their real types
@@ -72,11 +73,12 @@ export const FilamentEdit: React.FC<IResourceComponentsProps> = () => {
       const stringifiedAllValues = StringifiedExtras<IFilamentParsedExtras>(allValues);
 
       // Handle picture upload
-      if (allValues.picture_url) {
+      if (allValues.picture_url && allValues.picture_url instanceof File) {
+        console.log('picture_url', allValues.picture_url);
         const formData = new FormData();
         formData.append("file", allValues.picture_url);
         try {
-          const response = await axios.post("/api/v1/filament/upload-picture", formData, {
+          const response = await axios.post(getAPIURL() + "/upload-image", formData, {
             headers: {
               "Content-Type": "multipart/form-data",
             },
@@ -390,7 +392,7 @@ export const FilamentEdit: React.FC<IResourceComponentsProps> = () => {
         </Form.Item>
         {formProps.initialValues?.picture_url && (
           <Form.Item label={t("filament.fields.current_picture")}>
-            <img src={formProps.initialValues.picture_url} alt="Current Picture" style={{ maxWidth: "100%" }} />
+            <img src={getAPIURL() + formProps.initialValues.picture_url} alt="Current Picture" style={{ maxWidth: "100%" }} />
           </Form.Item>
         )}
         <Typography.Title level={5}>{t("settings.extra_fields.tab")}</Typography.Title>

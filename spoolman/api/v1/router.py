@@ -18,6 +18,7 @@ from spoolman.exceptions import ItemNotFoundError
 from spoolman.ws import websocket_manager
 
 from . import export, externaldb, field, filament, models, other, setting, spool, vendor
+from fastapi.responses import FileResponse
 
 logger = logging.getLogger(__name__)
 
@@ -118,6 +119,16 @@ async def upload_image(file: UploadFile) -> models.Message:
 
     picture_url = f"/uploads/{unique_filename}"
     return models.Message(message=picture_url)
+
+@app.get("/uploads/{filename}")
+async def download_image(filename: str) -> FileResponse:
+    data_dir = env.get_data_dir()
+    file_path = data_dir / "uploads" / filename
+
+    if not file_path.exists():
+        raise ItemNotFoundError(f"File {filename} not found")
+
+    return FileResponse(path=file_path, filename=filename)
 
 
 # Add routers

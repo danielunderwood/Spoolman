@@ -1,6 +1,6 @@
 import { Create, useForm, useSelect } from "@refinedev/antd";
 import { HttpError, IResourceComponentsProps, useInvalidate, useTranslate } from "@refinedev/core";
-import { Button, ColorPicker, Form, Input, InputNumber, Radio, Select, Typography, Upload, message } from "antd";
+import { Button, ColorPicker, Form, Input, InputNumber, Radio, Select, Typography, Upload, UploadFile, message } from "antd";
 import TextArea from "antd/es/input/TextArea";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
@@ -17,6 +17,7 @@ import { IVendor } from "../vendors/model";
 import { IFilament, IFilamentParsedExtras } from "./model";
 import { UploadOutlined } from "@ant-design/icons";
 import axios from "axios";
+import { UploadChangeParam } from "antd/lib/upload";
 
 dayjs.extend(utc);
 
@@ -26,6 +27,7 @@ interface CreateOrCloneProps {
 
 type IFilamentRequest = Omit<IFilamentParsedExtras, "id" | "registered"> & {
   vendor_id: number;
+  picture_url: string;
 };
 
 export const FilamentCreate: React.FC<IResourceComponentsProps & CreateOrCloneProps> = (props) => {
@@ -60,23 +62,7 @@ export const FilamentCreate: React.FC<IResourceComponentsProps & CreateOrClonePr
 
   const handleSubmit = async (redirectTo: "list" | "create") => {
     const values = StringifiedExtras(await form.validateFields());
-
-    // Handle picture upload
-    if (values.picture_url && values.picture_url instanceof File) {
-      const formData = new FormData();
-      formData.append("file", values.picture_url);
-      try {
-        const response = await axios.post("/api/v1/filament/upload-picture", formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        });
-        values.picture_url = response.data.message;
-      } catch (error) {
-        messageApi.error(t("filament.form.picture_upload_failed"));
-        return;
-      }
-    }
+    values.picture_url = values.picture_url || imageUrl || "";
 
     await onFinish(values);
     redirect(redirectTo);
@@ -109,7 +95,36 @@ export const FilamentCreate: React.FC<IResourceComponentsProps & CreateOrClonePr
       multi_color_direction: filament.multi_color_direction,
       settings_extruder_temp: filament.extruder_temp || undefined,
       settings_bed_temp: filament.bed_temp || undefined,
+      picture_url: undefined,
     });
+  };
+
+  const [imageUrl, setImageUrl] = useState<string | undefined>(undefined);
+
+  // FIXME: Should use the same logic as the edit page
+  const handleUpload = async (info: UploadChangeParam<UploadFile<any>>): Promise<void> => {
+    const file = info.file;
+    console.log(info.file)
+    if (info.file.status === undefined) {
+      console.log("Uploading file", file);
+      const data = new FormData();
+      if (file) {
+        data.append("file", file);
+      } else {
+        console.warn("No file to upload");
+        return;
+      }
+      const response = await fetch("http://localhost:8000/api/v1/upload-image", {
+        method: "POST",
+        body: data,
+      });
+      const json = await response.json();
+      const url = json.message;
+      console.log("Uploaded file to", url);
+      form.setFieldsValue({ picture_url: `http://localhost:8000/api/v1${url}` });
+      setImageUrl(`http://localhost:8000/api/v1${url}`);
+      console.log("Form values", form.getFieldsValue());
+    }
   };
 
   // Use useEffect to update the form's initialValues when the extra fields are loaded
@@ -406,6 +421,10 @@ export const FilamentCreate: React.FC<IResourceComponentsProps & CreateOrClonePr
           <ExtraFieldFormItem key={index} field={field} />
         ))}
       </Form>
+      <Upload.Dragger onChange={(info) => handleUpload(info)} beforeUpload={() => false}>
+        <p className="ant-upload-drag-icon">+</p>
+        <p className="ant-upload-text">Click or drag file to this area to upload</p>
+      </Upload.Dragger>
     </Create>
   );
 };

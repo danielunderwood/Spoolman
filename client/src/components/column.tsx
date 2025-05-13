@@ -13,6 +13,7 @@ import { TableState } from "../utils/saveload";
 import { getSortOrderForField, typeSorters } from "../utils/sorting";
 import { NumberFieldUnit, NumberFieldUnitRange } from "./numberField";
 import SpoolIcon from "./spoolIcon";
+import { getAPIURL } from "../utils/url";
 
 dayjs.extend(utc);
 
@@ -302,6 +303,7 @@ export function ActionsColumn<Obj extends Entity>(
 
 interface SpoolIconColumnProps<Obj extends Entity> extends FilteredQueryColumnProps<Obj> {
   color: (record: Obj) => string | { colors: string[]; vertical: boolean } | undefined;
+  picture_url?: (record: Obj) => string;
 }
 
 export function SpoolIconColumn<Obj extends Entity>(props: SpoolIconColumnProps<Obj>) {
@@ -349,11 +351,21 @@ export function SpoolIconColumn<Obj extends Entity>(props: SpoolIconColumnProps<
     render: (rawValue, record: Obj) => {
       const value = props.transform ? props.transform(rawValue) : rawValue;
       const colorObj = props.color(record);
+      const picture = props.picture_url?.(record);
       return (
         <Row wrap={false} justify="space-around" align="middle">
           {colorObj && (
             <Col flex="none">
               <SpoolIcon color={colorObj} />
+            </Col>
+          )}
+          {picture && (
+            <Col flex="none" style={{ margin: '1em' }}>
+              <img
+                src={getAPIURL() + picture}
+                alt={props.t("spool.fields.picture")}
+                style={{ width: 50, height: 50 }}
+              />
             </Col>
           )}
           <Col flex="auto">{value}</Col>

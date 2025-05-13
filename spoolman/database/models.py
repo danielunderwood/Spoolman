@@ -52,6 +52,7 @@ class Filament(Base):
     multi_color_hexes: Mapped[Optional[str]] = mapped_column(String(128))
     multi_color_direction: Mapped[Optional[str]] = mapped_column(String(16))
     external_id: Mapped[Optional[str]] = mapped_column(String(256))
+    picture_url: Mapped[Optional[str]] = mapped_column(String(256))
     extra: Mapped[list["FilamentField"]] = relationship(
         back_populates="filament",
         cascade="save-update, merge, delete, delete-orphan",

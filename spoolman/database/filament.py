@@ -46,6 +46,7 @@ async def create(
     multi_color_direction: Optional[MultiColorDirection] = None,
     external_id: Optional[str] = None,
     extra: Optional[dict[str, str]] = None,
+    picture_url: Optional[str] = None,
 ) -> models.Filament:
     """Add a new filament to the database."""
     vendor_item: Optional[models.Vendor] = None
@@ -74,6 +75,7 @@ async def create(
         multi_color_direction=multi_color_direction.value if multi_color_direction is not None else None,
         external_id=external_id,
         extra=[models.FilamentField(key=k, value=v) for k, v in (extra or {}).items()],
+        picture_url=picture_url,
     )
     db.add(filament)
     await db.commit()
